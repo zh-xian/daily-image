@@ -5,6 +5,8 @@ from io import BytesIO
 from datetime import datetime, timedelta
 import json
 import logging
+from zoneinfo import ZoneInfo 
+CHINA_TZ = ZoneInfo("Asia/Shanghai")
 
 # 日志配置
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -85,7 +87,7 @@ def save_image(img, filepath):
 
 def merge_and_update_images(new_images, existing_index):
     """合并新图片和现有索引，并更新文件"""
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    today_str = datetime.now(CHINA_TZ).strftime("%Y-%m-%d")
     updated_index = []
     existing_dates = {item["date"] for item in existing_index}
     
@@ -127,7 +129,7 @@ def merge_and_update_images(new_images, existing_index):
     combined_index.sort(key=lambda x: x["date"], reverse=True)
     
     # 保留最近30天的数据
-    thirty_days_ago = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+    thirty_days_ago = (datetime.now(CHINA_TZ) - timedelta(days=30)).strftime("%Y-%m-%d")
     filtered_index = []
     removed_files = set()
     
