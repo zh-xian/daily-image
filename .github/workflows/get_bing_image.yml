@@ -36,10 +36,15 @@ jobs:
 
     - name: Fetch page branch content into static/
       run: |
-        git fetch origin page
-        rm -rf static
-        mkdir static
-        git --work-tree=static checkout origin/page -- .
+        if git ls-remote --exit-code --heads origin page; then
+          git fetch origin page
+          rm -rf static
+          mkdir static
+          git --work-tree=static checkout origin/page -- .
+        else
+          echo "No 'page' branch exists, skipping fetch."
+          mkdir -p static
+        fi
         ls
 
     - name: Run Python script to get Bing image
