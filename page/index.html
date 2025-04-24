@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bing每日一图 - 留存世间奇景</title>
+  <title>每日一图 - 留存世间奇景</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+  <link rel="stylesheet" href="https://fontsapi.zeoseven.com/488/main/result.css">
   <style>
     * { 
       box-sizing: border-box; 
@@ -11,10 +13,64 @@
       padding: 0; 
     }
     body { 
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      font-family: "STDongGuanTi", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
       color: #e0e0e0; 
       background-color: #121212;
       line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 悬浮菜单 */
+    .floating-menu {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1001;
+      display: flex;
+      background: rgba(30, 30, 30, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 30px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .floating-menu::after {
+      content: '';
+      width: 15px;
+      /* background: rgba(30, 30, 30, 0.8); */
+    }
+    .floating-menu::after {
+      border-top-right-radius: 30px;
+      border-bottom-right-radius: 30px;
+    }
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 5px 10px;
+      color: #e0e0e0;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .menu-item:last-child {
+      border-right: none;
+    }
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+    .menu-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+    }
+    @media (max-width: 768px) {
+      .floating-menu {
+        display: none;
+      }
     }
 
     /* Hero Section */
@@ -46,6 +102,26 @@
       padding: 40px;
       color: #fff;
     }
+    .hero .center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 100%;
+    }
+    .hero .center-text h1 {
+      font-size: 3rem;
+      font-weight: 300;
+      margin-bottom: 15px;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+    .hero .center-text p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+    }
     .hero .overlay .date {
       font-size: 2rem; 
       margin-bottom: 10px;
@@ -54,7 +130,7 @@
     }
     .hero .overlay .copy {
       font-size: 1.2rem;
-      max-width: 800px;
+      max-width: 1000px;
       font-weight: 300;
       text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
@@ -63,6 +139,7 @@
     .history-container {
       padding: 40px 20px;
       background: #1e1e1e;
+      flex: 1;
     }
     .history {
       display: grid;
@@ -237,13 +314,54 @@
       transform: rotate(90deg);
       opacity: 1;
     }
+
+    /* 页脚样式 */
+    footer {
+      background: #1a1a1a;
+      color: #aaa;
+      padding: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    footer a {
+      color: #e0e0e0;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    footer a:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+    footer div {
+      margin-bottom: 10px;
+    }
+    #vercount_value_site_pv,
+    #vercount_value_site_uv {
+      font-weight: bold;
+      color: #e0e0e0;
+    }
   </style>
 </head>
 <body>
 
+  <!-- 悬浮菜单 -->
+  <nav class="floating-menu">
+    <a href="/" style="display: flex; align-items: center; margin-left: 10px;">
+      <img src="favicon.ico" alt="Icon" class="menu-icon">
+    </a>
+    <a href="https://blog.liushen.fun/" class="menu-item" target="_blank">博客</a>
+    <a href="https://www.liushen.fun/" class="menu-item" target="_blank">主页</a>
+    <a href="https://github.com/willow-god" class="menu-item" target="_blank">GitHub</a>
+    <a href="https://github.com/willow-god/daily-image" class="menu-item" target="_blank">项目</a>
+  </nav>
+
   <div class="hero">
     <img id="hero-img" src="" alt="Today's Bing Wallpaper">
     <div class="overlay">
+      <div class="center-text">
+        <h1>Bing每日一图</h1>
+        <p>由清羽飞扬托管，实现每日一图接口，保存最近30天爬取数据</p>
+      </div>
       <div class="date" id="hero-date"></div>
       <div class="copy" id="hero-copy"></div>
     </div>
@@ -252,6 +370,55 @@
   <div class="history-container">
     <div class="history" id="history"></div>
   </div>
+
+  <!-- 页脚 -->
+  <footer>
+    <script defer src="https://cn.vercount.one/js"></script>
+
+    <div style="margin-bottom: 0.5em">
+      网站总请求量：<span id="vercount_value_site_pv">🤕</span> |
+      独立访客数：<span id="vercount_value_site_uv">🤕</span>
+    </div>
+
+    <div style="margin-bottom: 0.5em">
+      Powered by
+      <a
+        href="https://github.com/features/actions"
+        target="_blank"
+        rel="nofollow noopener noreferrer"
+        >GitHub Actions</a
+      >
+      |
+      <a
+        href="cn.Bing.com"
+        target="_blank"
+        rel="nofollow noopener noreferrer"
+        >Bing_CN</a
+      >
+    </div>
+
+    <div>
+      项目地址: <a
+        href="https://github.com/willow-god/daily-image"
+        target="_blank"
+        rel="nofollow noopener noreferrer"
+        >daily-image</a
+      >
+      | MIT License © <span id="year"></span> |
+      <a
+        href="https://www.liushen.fun/"
+        target="_blank"
+        rel="nofollow noopener noreferrer"
+        >LiuShen</a
+      >
+    </div>
+
+    <script>
+      // 动态年份显示
+      document.getElementById("year").textContent =
+        new Date().getFullYear();
+    </script>
+  </footer>
 
   <!-- Modal -->
   <div class="modal" id="imageModal">

@@ -1,0 +1,78 @@
+name: Daily Get Bing Image
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  get_bing_image:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Pull latest repository
+      uses: actions/checkout@v4
+
+    - name: Cache pip packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Install python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install Pillow requests
+
+    - name: Fetch page branch content into static/
+      run: |
+        git fetch origin page
+        rm -rf static
+        mkdir static
+        git --work-tree=static checkout origin/page -- .
+        ls
+
+    - name: Run Python script to get Bing image
+      run: python main.py
+
+    - name: Configure git
+      run: |
+        git config --global user.email "actions@github.com"
+        git config --global user.name "GitHub Actions"
+
+    - name: Commit and push to page branch
+      run: |
+        cp ./page/index.html static/
+        cp ./page/favicon.ico static/
+        cd static
+        git init
+        git checkout -b page
+        git add .
+        git commit -m "⏱️GitHub Action每日定时更新"
+        git push --force https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git page
+
+    - name: Delete Workflow Runs
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+        retain_days: 30
+        keep_minimum_runs: 6
+
+  keepalive-workflow:
+    name: Keepalive Workflow
+    if: ${{ always() }}
+    needs: get_bing_image
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
