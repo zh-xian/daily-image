@@ -160,6 +160,25 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* 图片加载过渡效果 */
+.img-loading {
+  filter: blur(20px);
+  opacity: 0;
+  transform: scale(1.1);
+  transition: 
+    filter 0.8s ease,
+    opacity 0.8s ease,
+    transform 0.8s ease;
+  background: #2d2d2d;
+}
+
+.img-loaded {
+  filter: blur(0);
+  opacity: 1;
+  transform: scale(1);
+}
+
     .card {
       position: relative;
       border-radius: 8px;
@@ -356,7 +375,7 @@
   </nav>
 
   <div class="hero">
-    <img id="hero-img" src="" alt="Today's Bing Wallpaper">
+    <img id="hero-img" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMmQyZDJkIi8+PC9zdmc+" alt="Today's Bing Wallpaper">
     <div class="overlay">
       <div class="center-text">
         <h1>Bing每日一图</h1>
@@ -470,52 +489,73 @@
       }
     });
 
+    // 图片加载函数
+  function loadImage(imgElement, src) {
+    imgElement.classList.add('img-loading');
+    const loader = new Image();
+    loader.src = src;
+    loader.onload = () => {
+      imgElement.src = src;
+      imgElement.classList.add('img-loaded');
+    };
+    loader.onerror = () => {
+      imgElement.classList.remove('img-loading');
+      console.error('图片加载失败:', src);
+    };
+  }
+
     fetch('/picture/index.json')
-      .then(res => res.json())
-      .then(data => {
-        if (!Array.isArray(data) || data.length === 0) {
-          console.error('index.json 内容不合法');
-          return;
-        }
+    .then(res => res.json())
+    .then(data => {
+      if (!Array.isArray(data) || data.length === 0) {
+        console.error('index.json 内容不合法');
+        return;
+      }
 
-        // 默认将第一张作为今日图
-        const today = data[0];
-        document.getElementById('hero-img').src = today.path;
-        document.getElementById('hero-date').textContent = today.date;
-        document.getElementById('hero-copy').textContent = today.copyright;
+      // 默认将第一张作为今日图
+      const today = data[0];
+      const heroImg = document.getElementById('hero-img');
+      document.getElementById('hero-date').textContent = today.date;
+      document.getElementById('hero-copy').textContent = today.copyright;
+      loadImage(heroImg, today.path);
 
-        // 其余为历史图
-        const historyEl = document.getElementById('history');
-        data.forEach((item, index) => {
-          const card = document.createElement('div');
-          card.className = 'card';
+      // 其余为历史图
+      const historyEl = document.getElementById('history');
+      data.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
 
-          const img = document.createElement('img');
-          img.src = item.path;
-          img.alt = item.date;
+        const img = document.createElement('img');
+        img.alt = item.date;
+        
+        // 使用占位图
+        img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMmQyZDJkIi8+PC9zdmc+';
+        
+        const dateLabel = document.createElement('div');
+        dateLabel.className = 'date-label';
+        dateLabel.textContent = item.date;
 
-          const dateLabel = document.createElement('div');
-          dateLabel.className = 'date-label';
-          dateLabel.textContent = item.date;
+        const copyText = document.createElement('div');
+        copyText.className = 'copy-text';
+        copyText.textContent = item.copyright;
 
-          const copyText = document.createElement('div');
-          copyText.className = 'copy-text';
-          copyText.textContent = item.copyright;
+        card.appendChild(img);
+        card.appendChild(dateLabel);
+        card.appendChild(copyText);
+        historyEl.appendChild(card);
 
-          card.appendChild(img);
-          card.appendChild(dateLabel);
-          card.appendChild(copyText);
-          historyEl.appendChild(card);
+        // 加载实际图片
+        loadImage(img, item.path);
 
-          // Add click event to show modal
-          card.addEventListener('click', () => {
-            modalImage.src = item.path;
-            modalCaption.textContent = `${item.date} - ${item.copyright}`;
-            showModal();
-          });
+        // Add click event to show modal
+        card.addEventListener('click', () => {
+          modalImage.src = item.path;
+          modalCaption.textContent = `${item.date} - ${item.copyright}`;
+          showModal();
         });
-      })
-      .catch(err => console.error('加载 index.json 失败', err));
+      });
+    })
+    .catch(err => console.error('加载 index.json 失败', err));
   });
 </script>
 

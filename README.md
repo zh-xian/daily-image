@@ -51,9 +51,9 @@
 
 ## 🌍 在线预览地址
 
-- 🔗 **GitHub Pages 页面**：[https://willow-god.github.io/daily-image/](https://willow-god.github.io/daily-image/)
+- 🔗 **GitHub Pages 页面**：[https://bimg.liushen.fun/](https://bimg.liushen.fun/)
 - 🖼️ **最新壁纸图片**：
-  ![daily.webp](https://raw.githubusercontent.com/willow-god/daily-image/refs/heads/page/daily.webp)
+  ![daily.webp](https://bimg.liushen.fun/daily.webp)
 
 ---
 
