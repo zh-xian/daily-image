@@ -29,8 +29,9 @@ def fetch_bing_images(n=8):
         images = []
         for image in data["images"]:
             date = datetime.strptime(image["enddate"], "%Y%m%d").strftime("%Y-%m-%d")
+            logging.info(f"获取到图片: {date}")
+            # 生成高分辨率和备用URL
             urlbase = image["urlbase"]
-            logging.info(f"获取到图片: {date} - {urlbase}")
             high_res_url = f"https://www.bing.com{urlbase}_UHD.jpg"
             fallback_url = f"https://www.bing.com{urlbase}_1920x1080.jpg"
 
@@ -87,13 +88,16 @@ def save_image(img, filepath):
 def merge_and_update_images(new_images, existing_index):
     """合并新图片和现有索引，并更新文件"""
     today_str = datetime.now().strftime("%Y-%m-%d")
+    logging.info(f"今天的日期: {today_str}")
     updated_index = []
     existing_dates = {item["date"] for item in existing_index}
     
     # 处理新图片
     for img_info in new_images:
         date = img_info["date"]
+        logging.info(f"处理图片: {date}")
         if date in existing_dates:
+            logging.info(f"图片 {date} 已存在，跳过")
             continue  # 已存在的图片跳过
             
         filename = f"{date}.webp"
@@ -139,6 +143,7 @@ def merge_and_update_images(new_images, existing_index):
         else:
             # 记录要删除的文件
             removed_files.add(os.path.join(PICTURE_FOLDER, item["filename"]))
+            logging.info(f"图片 {item['date']} 超过30天，标记为删除")
     
     # 删除超过30天的旧图片
     for filepath in removed_files:
