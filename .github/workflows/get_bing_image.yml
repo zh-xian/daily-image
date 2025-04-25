@@ -57,6 +57,7 @@ jobs:
         cp ./page/index.html static/
         cp ./page/favicon.ico static/
         cp ./page/readme.md static/
+        cp ./page/edgeone.json static/
         cd static
         git init
         git checkout -b page
