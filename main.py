@@ -30,6 +30,7 @@ def fetch_bing_images(n=8):
         for image in data["images"]:
             date = datetime.strptime(image["enddate"], "%Y%m%d").strftime("%Y-%m-%d")
             urlbase = image["urlbase"]
+            logging.info(f"获取到图片: {date} - {urlbase}")
             high_res_url = f"https://www.bing.com{urlbase}_UHD.jpg"
             fallback_url = f"https://www.bing.com{urlbase}_1920x1080.jpg"
 
@@ -107,6 +108,7 @@ def merge_and_update_images(new_images, existing_index):
             
         # 如果是今天的图，保存额外几份
         if date == today_str:
+            logging.info("保存今天的图片为 daily.webp / daily.jpeg / original.jpeg , 今日时间: " + date)
             save_image(img, os.path.join(STATIC_FOLDER, "daily.webp"))
             img.save(os.path.join(STATIC_FOLDER, "daily.jpeg"), "JPEG", quality=95, optimize=True)
             img.save(os.path.join(STATIC_FOLDER, "original.jpeg"), "JPEG", quality=100)

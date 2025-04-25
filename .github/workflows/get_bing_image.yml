@@ -2,11 +2,8 @@ name: Daily Get Bing Image
 
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: "0 20 * * *"
   workflow_dispatch:
-
-env:
-  TZ: Asia/Shanghai
 
 jobs:
   get_bing_image:
