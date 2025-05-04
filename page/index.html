@@ -43,12 +43,9 @@
       .floating-menu::after {
         content: "";
         width: 15px;
-        /* background: rgba(30, 30, 30, 0.8); */
+        border-radius: 30px;
       }
-      .floating-menu::after {
-        border-top-right-radius: 30px;
-        border-bottom-right-radius: 30px;
-      }
+    
       .menu-item {
         display: flex;
         align-items: center;
@@ -56,22 +53,18 @@
         color: #e0e0e0;
         text-decoration: none;
         font-size: 0.9rem;
-        transition: all 0.2s ease;
       }
 
-      .menu-item:last-child {
-        border-right: none;
-      }
       .menu-item:hover {
-        background: rgba(255, 255, 255, 0.1);
         color: #fff;
+        border-bottom: 1px solid #fff;
       }
       .menu-icon {
-        width: 20px;
-        height: 20px;
+        width: 22px;
+        height: 22px;
         border-radius: 50%;
       }
-      @media (max-width: 768px) {
+      @media (max-width: 368px) {
         .floating-menu {
           display: none;
         }
@@ -140,6 +133,75 @@
         max-width: 1000px;
         font-weight: 300;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      /* 一言样式 */
+      .yiyan {
+        background: #1e1e1e;
+        color: #e0e0e0;
+        padding: 40px 0 20px 0;
+        text-align: center;
+        font-size: 1.2rem;
+        line-height: 1.8;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        position: relative;
+      }
+      
+      .yiyan-content {
+        max-width: 800px;
+        margin: 0 auto;
+        font-weight: 300;
+        position: relative;
+        padding: 20px 20px;
+        margin: 0 20px;
+      }
+
+      /* 添加左上角和右下角的直角装饰 */
+      .yiyan-content::before,
+      .yiyan-content::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-color: rgba(255, 255, 255, 0.3);
+        border-style: solid;
+      }
+
+      .yiyan-content::before {
+        top: 0;
+        left: 0;
+        border-width: 2px 0 0 2px;
+      }
+
+      .yiyan-content::after {
+        bottom: 0;
+        right: 0;
+        border-width: 0 2px 2px 0;
+      }
+      
+      .yiyan-loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      /* .yiyan-signature {
+        width: 760px;
+        max-width: 100%;
+        text-align: right;
+        padding: 20px 0;
+      } */
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
       }
 
       /* History Grid */
@@ -363,7 +425,7 @@
   <body>
     <!-- 悬浮菜单 -->
     <nav class="floating-menu">
-      <a href="/" style="display: flex; align-items: center; margin-left: 10px">
+      <a href="/" style="display: flex; align-items: center; margin: 0 5px 0 5px">
         <img src="favicon.ico" alt="Icon" class="menu-icon" />
       </a>
       <a href="https://blog.liushen.fun/" class="menu-item" target="_blank"
@@ -393,11 +455,19 @@
       <div class="overlay">
         <div class="center-text">
           <h1>Bing每日一图</h1>
-          <p>由清羽飞扬托管，实现每日一图接口，保存最近30天爬取数据</p>
+          <p>腾讯EO强力支持，实现每日一图接口，保存最近30天内的bing壁纸</p>
+          <p>由清羽飞扬进行维护，每日更新，每日精彩</p>
         </div>
         <div class="date" id="hero-date"></div>
         <div class="copy" id="hero-copy"></div>
       </div>
+    </div>
+
+    <div class="yiyan">
+      <div class="yiyan-content">
+        <span class="yiyan-loading"></span>
+      </div>
+      <div class="yiyan-signature">----送给素不相识的陌生人----</div>
     </div>
 
     <div class="history-container">
@@ -515,6 +585,32 @@
             console.error("图片加载失败:", src);
           };
         }
+
+        // 获取一言
+        const yiyanContent = document.querySelector('.yiyan-content');
+        
+        fetch('https://v2.xxapi.cn/api/yiyan?type=hitokoto')
+          .then(response => response.json())
+          .then(data => {
+            if (data.code === 200 && data.data) {
+              // 创建淡入效果
+              yiyanContent.innerHTML = `<span style="opacity: 0; transition: opacity 1s ease;">${data.data}</span>`;
+              
+              // 强制重绘后显示文字
+              setTimeout(() => {
+                const textSpan = yiyanContent.querySelector('span');
+                if (textSpan) {
+                  textSpan.style.opacity = '1';
+                }
+              }, 100);
+            } else {
+              yiyanContent.textContent = '生活，是一场无法回放的电影，我们都是自己的导演。';
+            }
+          })
+          .catch(error => {
+            console.error('获取一言失败:', error);
+            yiyanContent.textContent = '生活，是一场无法回放的电影，我们都是自己的导演。';
+          });
 
         fetch("/picture/index.json")
           .then((res) => res.json())
