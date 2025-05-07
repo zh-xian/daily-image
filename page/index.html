@@ -399,7 +399,7 @@
       footer {
         background: #1a1a1a;
         color: #aaa;
-        padding: 20px;
+        padding: 30px 15px;
         text-align: center;
         font-size: 0.9rem;
       }
@@ -484,6 +484,11 @@
       </div>
 
       <div style="margin-bottom: 0.5em">
+        本站已运行：<span id="running-days">计算中...</span> |
+        距离下次更新：<span id="next-update">计算中...</span>
+      </div>
+
+      <div style="margin-bottom: 0.5em">
         Powered by
         <a
           href="https://github.com/features/actions"
@@ -518,6 +523,40 @@
       <script>
         // 动态年份显示
         document.getElementById("year").textContent = new Date().getFullYear();
+        
+        // 计算网站运行时间和下次更新时间
+        function updateTimes() {
+          // 网站开始运行的日期（请修改为您的网站上线日期）
+          const startDate = new Date('2025-4-20'); // 示例日期，请替换为实际上线日期
+          const now = new Date();
+          
+          // 计算已运行天数
+          const runningDays = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+          document.getElementById("running-days").textContent = runningDays + " 天";
+          
+          // 计算距离下次更新的时间
+          const tomorrow = new Date(now);
+          tomorrow.setDate(tomorrow.getDate() + (now.getHours() >= 12 ? 1 : 0));
+          tomorrow.setHours(12, 0, 0, 0);
+          
+          // 计算剩余时间
+          let diff = tomorrow - now;
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          diff -= hours * 1000 * 60 * 60;
+          const minutes = Math.floor(diff / (1000 * 60));
+          diff -= minutes * 1000 * 60;
+          const seconds = Math.floor(diff / 1000);
+          
+          // 格式化显示
+          document.getElementById("next-update").textContent = 
+            `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // 初始更新
+        updateTimes();
+        
+        // 每秒更新一次倒计时
+        setInterval(updateTimes, 1000);
       </script>
     </footer>
 
