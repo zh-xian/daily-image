@@ -51,9 +51,7 @@
 
 ## 🌍 在线预览地址
 
-- 🔗 **GitHub Pages 页面**：[https://bing.liushen.fun/](https://bing.liushen.fun/)
-- 🖼️ **最新壁纸图片**：
-  ![daily.webp](https://bing.liushen.fun/daily.webp)
+- 🔗 **EO Pages 页面**：[https://bing.liushen.fun/](https://bing.liushen.fun/)
 
 ---
 
