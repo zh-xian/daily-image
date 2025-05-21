@@ -67,6 +67,7 @@ def load_existing_index():
     
     try:
         with open(INDEX_PATH, "r", encoding="utf-8") as f:
+            logging.info("加载现有index.json成功")
             return json.load(f)
     except Exception as e:
         logging.error(f"加载现有index.json失败: {e}")
@@ -138,7 +139,7 @@ def merge_and_update_images(new_images, existing_index):
     removed_files = set()
     
     for item in combined_index:
-        if item["date"] >= thirty_days_ago:
+        if item["date"] > thirty_days_ago:
             filtered_index.append(item)
         else:
             # 记录要删除的文件
