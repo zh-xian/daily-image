@@ -54,7 +54,7 @@ jobs:
 
     - name: Commit and push to page branch
       run: |
-        cp ./page/* static/
+        cp -r ./page/. static/
         cd static
         git init
         git checkout -b page
