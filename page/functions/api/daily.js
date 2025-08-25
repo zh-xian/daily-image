@@ -2,38 +2,52 @@ export default async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
 
-  // 获取 format 参数，默认为 webp
   const format = url.searchParams.get("format") || "webp";
-  // 是否直接返回二进制，默认 false（使用重定向）
-  const direct = url.searchParams.get("direct") === "true";
-
+  const redirect = url.searchParams.get("redirect") === "true"; // 👈 默认 direct
   let imagePath;
+
   switch (format) {
     case "jpeg":
-      imagePath = "/daily.jpeg";      // 压缩 JPEG
+      imagePath = "/daily.jpeg";
       break;
     case "original":
-      imagePath = "/original.jpeg";   // 原始 JPEG
+      imagePath = "/original.jpeg";
       break;
     case "webp":
     default:
-      imagePath = "/daily.webp";      // 默认 WEBP
+      imagePath = "/daily.webp";
       break;
   }
 
   const imageUrl = new URL(imagePath, request.url);
 
-  if (!direct) {
-    // 🚀 默认重定向
+  if (redirect) {
+    // 🚀 如果显式指定 redirect=true → 302 跳转
     return Response.redirect(imagePath, 302);
   }
 
-  // 🖼 direct=true → 返回图片二进制内容
-  const resp = await fetch(imageUrl.toString());
-  return new Response(await resp.arrayBuffer(), {
-    headers: {
-      "Content-Type": resp.headers.get("Content-Type") || "image/webp",
-      "Cache-Control": "public, max-age=3600"
-    },
-  });
+  const cache = caches.default;
+  const cacheKey = new Request(request.url, request);
+
+  // --- 尝试命中缓存 ---
+  let response = await cache.match(cacheKey);
+  if (response) {
+    response = new Response(response.body, response);
+    response.headers.set("bing-cache", "HIT");
+    response.headers.set("Cache-Control", "public, max-age=10800"); // 浏览器缓存 3 小时
+    return response;
+  }
+
+  // --- 未命中缓存 → 回源 ---
+  response = await fetch(new Request(imageUrl.toString(), request));
+
+  // 克隆一份存入边缘缓存（不阻塞响应）
+  context.waitUntil(cache.put(cacheKey, response.clone()));
+
+  // 返回响应（未命中 → MISS）
+  const finalResp = new Response(response.body, response);
+  finalResp.headers.set("bing-cache", "MISS");
+  finalResp.headers.set("Cache-Control", "public, max-age=10800"); // 浏览器缓存 3 小时
+
+  return finalResp;
 }
