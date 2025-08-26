@@ -32,9 +32,13 @@ export default async function onRequest(context) {
   }
 
   // fetch 必须传 Request 对象，才能命中 EdgeOne 节点缓存
-  const originResponse = await fetch(newRequest);
+  let originResponse = await fetch(newRequest);
 
   if (!originResponse.ok) {
+    let originResponse = await fetch(imageUrl.toString());
+    if (!originResponse.ok) {
+      return new Response("Origin fetch failed", { status: 502 });
+    }
     return new Response("Origin fetch failed", { status: 502 });
   }
 
