@@ -64,7 +64,7 @@
         height: 22px;
         border-radius: 50%;
       }
-      @media (max-width: 368px) {
+      @media (max-width: 500px) {
         .floating-menu {
           display: none;
         }
@@ -318,8 +318,7 @@
         justify-content: center;
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.3s ease, visibility 0.3s ease,
-          background 0.3s ease, backdrop-filter 0.3s ease;
+        transition: opacity 0.3s ease, visibility 0.3s ease, background 0.3s ease, backdrop-filter 0.3s ease;
       }
 
       .modal.active {
@@ -429,19 +428,22 @@
         <img src="favicon.ico" alt="Icon" class="menu-icon" />
       </a>
       <a href="https://blog.liushen.fun/" class="menu-item" target="_blank"
-        >博客</a
+        >站长博客</a
       >
       <a href="https://www.liushen.fun/" class="menu-item" target="_blank"
-        >主页</a
+        >个人主页</a
       >
       <a href="https://github.com/willow-god" class="menu-item" target="_blank"
         >GitHub</a
+      >
+      <a href="/api" class="menu-item" target="_blank"
+        >接口文档</a
       >
       <a
         href="https://github.com/willow-god/daily-image"
         class="menu-item"
         target="_blank"
-        >项目</a
+        >项目地址</a
       >
     </nav>
 
