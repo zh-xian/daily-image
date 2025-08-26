@@ -1,36 +1,18 @@
 export default async function onRequest(context) {
-  const { request, waitUntil } = context;
+  const { request } = context;
   const url = new URL(request.url);
 
   // 从当前请求的域名拼接 JSON 地址
   const host = url.origin;
   const jsonUrl = `${host}/picture/index.json`;
 
-  const cache = caches.default;
-  const cacheKey = new Request(jsonUrl, request);
-
-  // --- 先尝试读取 JSON 缓存 ---
-  let jsonResp = await cache.match(cacheKey);
-  let images;
-
-  if (jsonResp) {
-    // 命中缓存
-    jsonResp = new Response(await jsonResp.clone().arrayBuffer(), jsonResp);
-    jsonResp.headers.set("bing-cache", "HIT");
-    images = await jsonResp.json();
-  } else {
-    // 未命中缓存 → fetch
-    const fetchResp = await fetch(new Request(jsonUrl, request));
-    const data = await fetchResp.json();
-
-    // 存入缓存（12 小时）
-    const cacheable = new Response(JSON.stringify(data), fetchResp);
-    cacheable.headers.set("Cache-Control", "public, max-age=43200");
-    waitUntil(cache.put(cacheKey, cacheable.clone()));
-
-    images = data;
-    fetchResp.headers.set("bing-cache", "MISS");
+  // 直接 fetch JSON（EO 会自己命中缓存）
+  const fetchResp = await fetch(new Request(jsonUrl, request));
+  if (!fetchResp.ok) {
+    return new Response("Failed to load index.json", { status: 502 });
   }
+
+  let images = await fetchResp.json();
 
   // 去掉最后一张，防止过期
   if (images.length > 1) {
@@ -49,14 +31,17 @@ export default async function onRequest(context) {
     return Response.redirect(imagePath, 302);
   }
 
-  // 🖼 直接返回图片二进制，走 EdgeOne 节点缓存
+  // 🖼 直接返回图片二进制，走 EO 节点缓存
   const resp = await fetch(new Request(imageUrl.toString(), request));
+  if (!resp.ok) {
+    return new Response("Failed to fetch image", { status: 502 });
+  }
 
   return new Response(resp.body, {
     headers: {
       "Content-Type": resp.headers.get("Content-Type") || "image/webp",
       "Cache-Control": "public, max-age=10800", // 浏览器缓存 3 小时
-      "bing-cache": resp.headers.get("bing-cache") || "MISS-IMG",
+      "bing-cache": "EO-FETCH", // 标识 EO fetch 命中
     },
   });
 }
