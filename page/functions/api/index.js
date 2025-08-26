@@ -29,19 +29,18 @@ export default async function onRequest(context) {
   <div class="endpoint">
     <h2>/api/random</h2>
     <ul>
-      <li><code>${base}/api/random</code> → 随机图片（默认 <strong>重定向</strong>）</li>
-      <li><code>${base}/api/random?direct=true</code> → 随机图片（二进制直返）</li>
-      <li><code>${base}/api/random?json=true</code> → （可扩展）返回图片元数据</li>
+      <li><code>${base}/api/random</code> → 随机图片（默认 <strong>不重定向</strong>）</li>
+      <li><code>${base}/api/random?redirect=true</code> → 随机图片（使用重定向）</li>
     </ul>
   </div>
 
   <div class="endpoint">
     <h2>/api/daily</h2>
     <ul>
-      <li><code>${base}/api/daily</code> → 今日图像（默认 WebP，重定向）</li>
+      <li><code>${base}/api/daily</code> → 今日图像（默认 WebP，不重定向）</li>
       <li><code>${base}/api/daily?format=jpeg</code> → 压缩 JPEG</li>
       <li><code>${base}/api/daily?format=original</code> → 原始 JPEG</li>
-      <li><code>${base}/api/daily?direct=true</code> → 直接返回二进制（非重定向）</li>
+      <li><code>${base}/api/daily?redirect=true</code> → 今日图像（使用重定向）</li>
     </ul>
   </div>
 
