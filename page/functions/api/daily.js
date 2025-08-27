@@ -2,7 +2,7 @@ export default async function onRequest(context) {
   const { request } = context;
   const url = new URL(request.url);
 
-  // 参数处理和验证
+  // 处理参数
   const format = url.searchParams.get("format") || "webp";
   const redirect = url.searchParams.get("redirect") === "true";
 
@@ -13,38 +13,35 @@ export default async function onRequest(context) {
   }
 
   // 确定图片路径
-  let imagePath;
-  switch (format) {
-    case "jpeg": imagePath = "/daily.jpeg"; break;
-    case "original": imagePath = "/original.jpeg"; break;
-    default: imagePath = "/daily.webp";
-  }
+  const imagePath = format === "jpeg" 
+    ? "/daily.jpeg" 
+    : format === "original" 
+      ? "/original.jpeg" 
+      : "/daily.webp";
 
-  // 基于原始 request 构造新的 Request，保持 host 一致
+  // 构造目标 URL
   const imageUrl = new URL(request.url);
   imageUrl.pathname = imagePath;
 
-  const newRequest = new Request(imageUrl.toString(), request);
-
-  // 处理重定向
+  // 如果需要重定向
   if (redirect) {
     return Response.redirect(imageUrl.toString(), 302);
   }
 
-  // fetch 必须传 Request 对象，才能命中 EdgeOne 节点缓存
-  let originResponse = await fetch(newRequest);
+  // 第一次请求：带 Request 对象，可命中 EdgeOne 缓存
+  let originResponse = await fetch(new Request(imageUrl.toString(), request));
 
+  // 第二次请求：直连 origin
   if (!originResponse.ok) {
-    let originResponse = await fetch(imageUrl.toString());
+    originResponse = await fetch(imageUrl.toString());
     if (!originResponse.ok) {
       return new Response("Origin fetch failed", { status: 502 });
     }
-    return new Response("Origin fetch failed", { status: 502 });
   }
 
-  // 返回响应
+  // 返回响应（复制 headers + body）
   const response = new Response(originResponse.body, originResponse);
-  response.headers.set("bing-cache", "EDGEONE");
+  response.headers.set("bing-cache", originResponse.redirected ? "BYPASS" : "EDGEONE");
   response.headers.set("Cache-Control", "public, max-age=10800");
 
   return response;
